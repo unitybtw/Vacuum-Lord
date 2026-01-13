@@ -27,13 +27,18 @@ public class VacuumSystem : MonoBehaviour
                 other.transform.localScale = Vector3.Lerp(other.transform.localScale, Vector3.zero, 10f * Time.deltaTime);
             }
 
-            // 3. Obje tam deliğe girdiyse YOK ET ve PARA VER
+        // 3. Obje tam deliğe girdiyse
             if (mesafe < 0.2f)
             {
-                // TODO: İleride buraya para artırma kodu ekleyeceğiz (GameManager.Instance.ParaEkle(cop.paraDegeri))
-                Debug.Log(cop.name + " Vakumlandı! +" + cop.paraDegeri + " TL");
-                Destroy(other.gameObject);
+                // ARTIK PARA VERME YOK (Satış alanında vereceğiz)
+                // ARTIK DESTROY YOK
+
+                // YENİ: İstif Yöneticisine gönder
+                if (StackManager.instance != null)
+                {
+                    StackManager.instance.AddToStack(other.gameObject);
+                }
             }
         }
+        } 
     }
-}

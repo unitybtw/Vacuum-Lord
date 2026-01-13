@@ -3,42 +3,39 @@ using UnityEngine;
 public class VacuumSystem : MonoBehaviour
 {
     [Header("Vakum Ayarları")]
-    public float cekimHizi = 5f; // Objelerin sana gelme hızı
-    public Transform vakumNoktasi; // Objelerin gireceği delik (Sırt çantası veya hortum ucu)
+    public float cekimHizi = 15f;    // Objelerin gelme hızı
+    public Transform vakumNoktasi;   // Objelerin gireceği delik
 
     private void OnTriggerStay(Collider other)
     {
-        // Eğer alanımıza giren şey bir "Collectable" ise...
+        // 1. Kapasite kontrolü: Çanta doluysa çekme
+        if (StackManager.instance.tasinanObjeler.Count >= StackManager.instance.maxKapasite)
+            return;
+
         Collectable cop = other.GetComponent<Collectable>();
 
         if (cop != null)
         {
             cop.vakumlaniyorMu = true;
 
-            // 1. Objeyi vakum noktasına doğru çek
+            // Objeyi vakum noktasına doğru çek
             other.transform.position = Vector3.MoveTowards(other.transform.position, vakumNoktasi.position, cekimHizi * Time.deltaTime);
 
-            // 2. Objeyi küçült (Wobble / Jöle Efekti)
-            // Obje yaklaştıkça scale'i 0'a doğru küçülsün
+            // Wobble (Küçülme) efekti
             float mesafe = Vector3.Distance(other.transform.position, vakumNoktasi.position);
-            
-            if (mesafe < 0.5f) // Çok yaklaştıysa
+            if (mesafe < 0.5f)
             {
-                other.transform.localScale = Vector3.Lerp(other.transform.localScale, Vector3.zero, 10f * Time.deltaTime);
+                other.transform.localScale = Vector3.Lerp(other.transform.localScale, Vector3.zero, 15f * Time.deltaTime);
             }
 
-        // 3. Obje tam deliğe girdiyse
+            // Obje deliğe girdiyse StackManager'a teslim et
             if (mesafe < 0.2f)
             {
-                // ARTIK PARA VERME YOK (Satış alanında vereceğiz)
-                // ARTIK DESTROY YOK
-
-                // YENİ: İstif Yöneticisine gönder
-                if (StackManager.instance != null)
-                {
-                    StackManager.instance.AddToStack(other.gameObject);
-                }
+                // Objenin scale'ini düzeltip öyle verelim (yoksa minicik kalır)
+                other.transform.localScale = Vector3.one; 
+                
+                StackManager.instance.AddToStack(other.gameObject);
             }
         }
-        } 
     }
+}

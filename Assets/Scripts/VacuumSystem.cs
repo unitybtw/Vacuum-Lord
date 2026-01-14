@@ -7,7 +7,7 @@ public class VacuumSystem : MonoBehaviour
     public Transform vakumNoktasi;   
 
     [Header("Efektler")]
-    public GameObject vakumEfektiPrefab; // --- YENİ: Toz efekti ---
+    public GameObject vakumEfektiPrefab;
 
     private void OnTriggerStay(Collider other)
     {
@@ -40,13 +40,18 @@ public class VacuumSystem : MonoBehaviour
                 // Ses Çal
                 if (AudioManager.instance != null) AudioManager.instance.PlayPop();
 
-                // --- YENİ KISIM: TOZ EFEKTİ ÇIKAR ---
+                // Toz Efekti
                 if (vakumEfektiPrefab != null)
                 {
-                    // Efekti vakumun ucunda (vakumNoktasi) oluştur
                     Instantiate(vakumEfektiPrefab, vakumNoktasi.position, Quaternion.identity);
                 }
-                // ------------------------------------
+
+                // --- YENİ KISIM: TİTREŞİM ---
+                if (VibrationManager.instance != null)
+                {
+                    VibrationManager.instance.Titret();
+                }
+                // ----------------------------
             }
         }
     }

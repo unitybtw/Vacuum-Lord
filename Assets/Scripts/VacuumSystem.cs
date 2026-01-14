@@ -3,12 +3,14 @@ using UnityEngine;
 public class VacuumSystem : MonoBehaviour
 {
     [Header("Vakum Ayarları")]
-    public float cekimHizi = 15f;    // Objelerin gelme hızı
-    public Transform vakumNoktasi;   // Objelerin gireceği delik
+    public float cekimHizi = 15f;    
+    public Transform vakumNoktasi;   
+
+    [Header("Efektler")]
+    public GameObject vakumEfektiPrefab; // --- YENİ: Toz efekti ---
 
     private void OnTriggerStay(Collider other)
     {
-        // 1. Kapasite kontrolü: Çanta doluysa çekme
         if (StackManager.instance.tasinanObjeler.Count >= StackManager.instance.maxKapasite)
             return;
 
@@ -18,29 +20,33 @@ public class VacuumSystem : MonoBehaviour
         {
             cop.vakumlaniyorMu = true;
 
-            // Objeyi vakum noktasına doğru çek
+            // Çekim hareketi
             other.transform.position = Vector3.MoveTowards(other.transform.position, vakumNoktasi.position, cekimHizi * Time.deltaTime);
 
-            // Wobble (Küçülme) efekti
             float mesafe = Vector3.Distance(other.transform.position, vakumNoktasi.position);
+            
+            // Küçülme efekti
             if (mesafe < 0.5f)
             {
                 other.transform.localScale = Vector3.Lerp(other.transform.localScale, Vector3.zero, 15f * Time.deltaTime);
             }
 
-            // Obje deliğe girdiyse StackManager'a teslim et
+            // İçeri girdi mi?
             if (mesafe < 0.2f)
             {
-                // Objenin scale'ini düzeltip öyle verelim (yoksa minicik kalır)
                 other.transform.localScale = Vector3.one; 
-                
                 StackManager.instance.AddToStack(other.gameObject);
 
-                // --- YENİ KISIM: SESİ ÇAL (POP) ---
-                if (AudioManager.instance != null)
+                // Ses Çal
+                if (AudioManager.instance != null) AudioManager.instance.PlayPop();
+
+                // --- YENİ KISIM: TOZ EFEKTİ ÇIKAR ---
+                if (vakumEfektiPrefab != null)
                 {
-                    AudioManager.instance.PlayPop();
+                    // Efekti vakumun ucunda (vakumNoktasi) oluştur
+                    Instantiate(vakumEfektiPrefab, vakumNoktasi.position, Quaternion.identity);
                 }
+                // ------------------------------------
             }
         }
     }

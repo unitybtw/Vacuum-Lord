@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI; // Slider için gerekli
 
 public class GameManager : MonoBehaviour
 {
@@ -9,6 +10,11 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI paraText;         
     public TextMeshProUGUI hizFiyatText;     
     public TextMeshProUGUI kapasiteFiyatText;
+    
+    // --- YENİ EKLENENLER (ÇANTA UI) ---
+    public Slider kapasiteSlider;
+    public TextMeshProUGUI kapasiteText;
+    // ----------------------------------
 
     [Header("Efektler")]
     public GameObject floatingTextPrefab; 
@@ -28,32 +34,22 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        LoadGame(); // Oyun açılınca verileri yükle
+        LoadGame();
         UpdateUI(); 
     }
 
     public void ParaEkle(int miktar)
     {
         toplamPara += miktar;
-        SaveGame(); // Her para değişiminde kaydet
+        SaveGame();
         UpdateUI();
 
-        // Uçan Yazı Efekti
         if (floatingTextPrefab != null && playerScript != null && miktar > 0)
         {
-            // Oyuncunun 2.5 birim yukarısında oluştur
             Vector3 spawnPos = playerScript.transform.position + new Vector3(0, 2.5f, 0);
             GameObject yazi = Instantiate(floatingTextPrefab, spawnPos, Quaternion.identity);
-            
             FloatingText textScript = yazi.GetComponent<FloatingText>();
-            
-            // --- DÜZELTİLEN KISIM BURASI ---
-            // Sayıyı yazıya çevirmek için başına "+" ekledik
-            if (textScript != null) 
-            {
-                textScript.Setup("+" + miktar); 
-            }
-            // -------------------------------
+            if (textScript != null) textScript.Setup("+" + miktar);
         }
     }
 
@@ -64,8 +60,7 @@ public class GameManager : MonoBehaviour
             toplamPara -= hizMaliyeti;       
             playerScript.moveSpeed += 1f;    
             hizMaliyeti += 50;
-            
-            SaveGame(); // Kaydet
+            SaveGame();
             UpdateUI();                      
         }
     }
@@ -77,52 +72,63 @@ public class GameManager : MonoBehaviour
             toplamPara -= kapasiteMaliyeti;          
             StackManager.instance.maxKapasite += 5;  
             kapasiteMaliyeti += 100;
-            
-            SaveGame(); // Kaydet
+            SaveGame();
             UpdateUI();                              
         }
     }
 
-    void UpdateUI()
+    // Bu fonksiyonu her yerden çağırabiliriz (Update içinde de çağıracağız)
+    public void UpdateUI()
     {
+        // Para Yazısı
         if (paraText != null) paraText.text = toplamPara.ToString() + " $";
         if (hizFiyatText != null) hizFiyatText.text = "HIZ: " + hizMaliyeti + "$";
         if (kapasiteFiyatText != null) kapasiteFiyatText.text = "ÇANTA: " + kapasiteMaliyeti + "$";
+
+        // --- YENİ: ÇANTA UI GÜNCELLEME ---
+        if (StackManager.instance != null)
+        {
+            int mevcut = StackManager.instance.tasinanObjeler.Count;
+            int max = StackManager.instance.maxKapasite;
+
+            // Slider doluluk oranı (0 ile 1 arası)
+            if (kapasiteSlider != null) 
+                kapasiteSlider.value = (float)mevcut / (float)max;
+
+            // Yazı (Örn: 5 / 10)
+            if (kapasiteText != null)
+                kapasiteText.text = mevcut + " / " + max;
+        }
     }
 
-    // --- SAVE & LOAD SİSTEMİ ---
+    private void Update()
+    {
+        // Çanta durumu sürekli değişebileceği için UI'ı sürekli güncel tutalım
+        UpdateUI(); 
+        
+        if (Input.GetKeyDown(KeyCode.Delete)) { PlayerPrefs.DeleteAll(); Debug.Log("Sıfırlandı"); }
+    }
 
+    // Save & Load kodları aynı kalıyor...
     public void SaveGame()
     {
         PlayerPrefs.SetInt("Para", toplamPara);
         PlayerPrefs.SetInt("HizMaliyeti", hizMaliyeti);
         PlayerPrefs.SetInt("KapasiteMaliyeti", kapasiteMaliyeti);
-        
-        // Oyuncunun özelliklerini de kaydedelim
-        if(playerScript != null)
-            PlayerPrefs.SetFloat("PlayerSpeed", playerScript.moveSpeed);
-            
-        if(StackManager.instance != null)
-            PlayerPrefs.SetInt("PlayerCapacity", StackManager.instance.maxKapasite);
-        
-        PlayerPrefs.Save(); // Diske yaz
+        if(playerScript != null) PlayerPrefs.SetFloat("PlayerSpeed", playerScript.moveSpeed);
+        if(StackManager.instance != null) PlayerPrefs.SetInt("PlayerCapacity", StackManager.instance.maxKapasite);
+        PlayerPrefs.Save();
     }
 
     public void LoadGame()
     {
-        // Eğer daha önce kayıt varsa yükle
         if (PlayerPrefs.HasKey("Para"))
         {
             toplamPara = PlayerPrefs.GetInt("Para");
             hizMaliyeti = PlayerPrefs.GetInt("HizMaliyeti");
             kapasiteMaliyeti = PlayerPrefs.GetInt("KapasiteMaliyeti");
-
-            // Oyuncunun hızını ve kapasitesini geri yükle
-            if(playerScript != null)
-                playerScript.moveSpeed = PlayerPrefs.GetFloat("PlayerSpeed", 5f); // Varsayılan 5
-            
-            if(StackManager.instance != null)
-                StackManager.instance.maxKapasite = PlayerPrefs.GetInt("PlayerCapacity", 10); // Varsayılan 10
+            if(playerScript != null) playerScript.moveSpeed = PlayerPrefs.GetFloat("PlayerSpeed", 5f);
+            if(StackManager.instance != null) StackManager.instance.maxKapasite = PlayerPrefs.GetInt("PlayerCapacity", 10);
         }
     }
 }

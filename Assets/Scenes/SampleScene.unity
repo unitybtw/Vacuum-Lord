@@ -1288,9 +1288,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spawner
   copPrefab: {fileID: 1775902104468118274, guid: e807dbc20ce244e17a0d8567ed1b5b74, type: 3}
+  altinCopPrefab: {fileID: 1775902104468118274, guid: f22d0cc5350d64dba98d3e48f425b2fc, type: 3}
   uretimHizi: 2
   alanGenisligi: 4
   maksCopSayisi: 20
+  altinSansi: 10
 --- !u!4 &575159111
 Transform:
   m_ObjectHideFlags: 0
@@ -3537,6 +3539,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2043569927}
   - component: {fileID: 2043569926}
+  - component: {fileID: 2043569928}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -3579,6 +3582,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2043569928
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2043569925}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db94f2f4d24e5469d934242b95fa2c2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VibrationManager
+  titresimAcik: 1
 --- !u!1 &2056668521
 GameObject:
   m_ObjectHideFlags: 0
@@ -3713,9 +3729,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Spawner
   copPrefab: {fileID: 1775902104468118274, guid: e807dbc20ce244e17a0d8567ed1b5b74, type: 3}
+  altinCopPrefab: {fileID: 1775902104468118274, guid: f22d0cc5350d64dba98d3e48f425b2fc, type: 3}
   uretimHizi: 2
   alanGenisligi: 4
   maksCopSayisi: 20
+  altinSansi: 10
 --- !u!4 &2062754705
 Transform:
   m_ObjectHideFlags: 0

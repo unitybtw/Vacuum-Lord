@@ -41,11 +41,19 @@ public class GameManager : MonoBehaviour
         // Uçan Yazı Efekti
         if (floatingTextPrefab != null && playerScript != null && miktar > 0)
         {
+            // Oyuncunun 2.5 birim yukarısında oluştur
             Vector3 spawnPos = playerScript.transform.position + new Vector3(0, 2.5f, 0);
             GameObject yazi = Instantiate(floatingTextPrefab, spawnPos, Quaternion.identity);
             
             FloatingText textScript = yazi.GetComponent<FloatingText>();
-            if (textScript != null) textScript.Setup(miktar);
+            
+            // --- DÜZELTİLEN KISIM BURASI ---
+            // Sayıyı yazıya çevirmek için başına "+" ekledik
+            if (textScript != null) 
+            {
+                textScript.Setup("+" + miktar); 
+            }
+            // -------------------------------
         }
     }
 
@@ -91,15 +99,18 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.SetInt("KapasiteMaliyeti", kapasiteMaliyeti);
         
         // Oyuncunun özelliklerini de kaydedelim
-        PlayerPrefs.SetFloat("PlayerSpeed", playerScript.moveSpeed);
-        PlayerPrefs.SetInt("PlayerCapacity", StackManager.instance.maxKapasite);
+        if(playerScript != null)
+            PlayerPrefs.SetFloat("PlayerSpeed", playerScript.moveSpeed);
+            
+        if(StackManager.instance != null)
+            PlayerPrefs.SetInt("PlayerCapacity", StackManager.instance.maxKapasite);
         
         PlayerPrefs.Save(); // Diske yaz
     }
 
     public void LoadGame()
     {
-        // Eğer daha önce kayıt varsa yükle, yoksa varsayılanları kullan
+        // Eğer daha önce kayıt varsa yükle
         if (PlayerPrefs.HasKey("Para"))
         {
             toplamPara = PlayerPrefs.GetInt("Para");
@@ -107,11 +118,11 @@ public class GameManager : MonoBehaviour
             kapasiteMaliyeti = PlayerPrefs.GetInt("KapasiteMaliyeti");
 
             // Oyuncunun hızını ve kapasitesini geri yükle
-            playerScript.moveSpeed = PlayerPrefs.GetFloat("PlayerSpeed");
-            StackManager.instance.maxKapasite = PlayerPrefs.GetInt("PlayerCapacity");
+            if(playerScript != null)
+                playerScript.moveSpeed = PlayerPrefs.GetFloat("PlayerSpeed", 5f); // Varsayılan 5
+            
+            if(StackManager.instance != null)
+                StackManager.instance.maxKapasite = PlayerPrefs.GetInt("PlayerCapacity", 10); // Varsayılan 10
         }
     }
-    
-    // Test amaçlı: Verileri sıfırlamak istersen bu kodu kullanabilirsin
-    // private void Update() { if(Input.GetKeyDown(KeyCode.R)) { PlayerPrefs.DeleteAll(); Debug.Log("Resetlendi"); } }
 }

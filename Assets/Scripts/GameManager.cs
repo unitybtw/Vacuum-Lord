@@ -1,5 +1,5 @@
 using UnityEngine;
-using TMPro; // TextMeshPro kütüphanesi
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI kapasiteFiyatText;
 
     [Header("Efektler")]
-    public GameObject floatingTextPrefab; // --- YENİ EKLENDİ: Uçan yazı prefab'ı buraya gelecek ---
+    public GameObject floatingTextPrefab; 
 
     [Header("Ekonomi Ayarları")]
     public int toplamPara = 0;
@@ -28,33 +28,25 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        LoadGame(); // Oyun açılınca verileri yükle
         UpdateUI(); 
     }
 
-    // Para ekleme fonksiyonu (GÜNCELLENDİ)
     public void ParaEkle(int miktar)
     {
         toplamPara += miktar;
+        SaveGame(); // Her para değişiminde kaydet
         UpdateUI();
 
-        // --- YENİ EKLENDİ: Uçan Yazı Oluşturma ---
-        if (floatingTextPrefab != null && playerScript != null)
+        // Uçan Yazı Efekti
+        if (floatingTextPrefab != null && playerScript != null && miktar > 0)
         {
-            // Oyuncunun kafasının biraz üstünde pozisyon belirle (Y + 2.0f)
             Vector3 spawnPos = playerScript.transform.position + new Vector3(0, 2.5f, 0);
-            
-            // Yazıyı oluştur
             GameObject yazi = Instantiate(floatingTextPrefab, spawnPos, Quaternion.identity);
             
-            // Yazıya miktarı gönder (Setup fonksiyonunu çağır)
-            // Not: FloatingText scriptinin var olduğundan emin olmalıyız
             FloatingText textScript = yazi.GetComponent<FloatingText>();
-            if (textScript != null)
-            {
-                textScript.Setup(miktar);
-            }
+            if (textScript != null) textScript.Setup(miktar);
         }
-        // ------------------------------------------
     }
 
     public void HizaUpgradeYap()
@@ -63,7 +55,9 @@ public class GameManager : MonoBehaviour
         {
             toplamPara -= hizMaliyeti;       
             playerScript.moveSpeed += 1f;    
-            hizMaliyeti += 50;               
+            hizMaliyeti += 50;
+            
+            SaveGame(); // Kaydet
             UpdateUI();                      
         }
     }
@@ -74,7 +68,9 @@ public class GameManager : MonoBehaviour
         {
             toplamPara -= kapasiteMaliyeti;          
             StackManager.instance.maxKapasite += 5;  
-            kapasiteMaliyeti += 100;                 
+            kapasiteMaliyeti += 100;
+            
+            SaveGame(); // Kaydet
             UpdateUI();                              
         }
     }
@@ -85,4 +81,37 @@ public class GameManager : MonoBehaviour
         if (hizFiyatText != null) hizFiyatText.text = "HIZ: " + hizMaliyeti + "$";
         if (kapasiteFiyatText != null) kapasiteFiyatText.text = "ÇANTA: " + kapasiteMaliyeti + "$";
     }
+
+    // --- SAVE & LOAD SİSTEMİ ---
+
+    public void SaveGame()
+    {
+        PlayerPrefs.SetInt("Para", toplamPara);
+        PlayerPrefs.SetInt("HizMaliyeti", hizMaliyeti);
+        PlayerPrefs.SetInt("KapasiteMaliyeti", kapasiteMaliyeti);
+        
+        // Oyuncunun özelliklerini de kaydedelim
+        PlayerPrefs.SetFloat("PlayerSpeed", playerScript.moveSpeed);
+        PlayerPrefs.SetInt("PlayerCapacity", StackManager.instance.maxKapasite);
+        
+        PlayerPrefs.Save(); // Diske yaz
+    }
+
+    public void LoadGame()
+    {
+        // Eğer daha önce kayıt varsa yükle, yoksa varsayılanları kullan
+        if (PlayerPrefs.HasKey("Para"))
+        {
+            toplamPara = PlayerPrefs.GetInt("Para");
+            hizMaliyeti = PlayerPrefs.GetInt("HizMaliyeti");
+            kapasiteMaliyeti = PlayerPrefs.GetInt("KapasiteMaliyeti");
+
+            // Oyuncunun hızını ve kapasitesini geri yükle
+            playerScript.moveSpeed = PlayerPrefs.GetFloat("PlayerSpeed");
+            StackManager.instance.maxKapasite = PlayerPrefs.GetInt("PlayerCapacity");
+        }
+    }
+    
+    // Test amaçlı: Verileri sıfırlamak istersen bu kodu kullanabilirsin
+    // private void Update() { if(Input.GetKeyDown(KeyCode.R)) { PlayerPrefs.DeleteAll(); Debug.Log("Resetlendi"); } }
 }

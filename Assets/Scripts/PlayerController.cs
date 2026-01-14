@@ -6,38 +6,39 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 5f;
     public float rotationSpeed = 10f;
 
-    private Vector3 _moveVector;
-    private Vector3 _lastInputPos;
-    private bool _isTouching;
+    [Header("Kontroller")]
+    public MobileJoystick joystick; // Joystick scriptini buraya bağlayacağız
 
-    void Update()
+    private Rigidbody rb;
+
+    void Start()
     {
-        // Dokunma algılama
-        if (Input.GetMouseButtonDown(0))
-        {
-            _isTouching = true;
-            _lastInputPos = Input.mousePosition;
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            _isTouching = false;
-        }
+        rb = GetComponent<Rigidbody>();
+    }
 
-        // Hareket hesaplama
-        if (_isTouching)
+    void FixedUpdate() // Fizik işlemleri FixedUpdate'te yapılır
+    {
+        // Joystick yoksa hata vermesin diye kontrol
+        if (joystick == null) return;
+
+        // Joystick'ten gelen veriyi al
+        float xHareket = joystick.InputVector.x;
+        float zHareket = joystick.InputVector.y;
+
+        // Hareket vektörünü oluştur
+        Vector3 movement = new Vector3(xHareket, 0, zHareket);
+
+        // Eğer parmak hareket ediyorsa (Vektör sıfır değilse)
+        if (movement.magnitude > 0.1f)
         {
-            Vector3 currentInputPos = Input.mousePosition;
-            Vector3 direction = (currentInputPos - _lastInputPos).normalized;
+            // 1. Hareket Ettir (Fizik motoru ile)
+            // Karakterin mevcut pozisyonuna hareket yönünü ekliyoruz
+            Vector3 yeniPozisyon = rb.position + movement * moveSpeed * Time.fixedDeltaTime;
+            rb.MovePosition(yeniPozisyon);
 
-            if (Vector3.Distance(currentInputPos, _lastInputPos) > 5f)
-            {
-                _moveVector = new Vector3(direction.x, 0, direction.y);
-                transform.position += _moveVector * moveSpeed * Time.deltaTime;
-
-                Quaternion targetRotation = Quaternion.LookRotation(_moveVector);
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-            }
-            _lastInputPos = currentInputPos;
+            // 2. Yüzünü Döndür
+            Quaternion hedefRotasyon = Quaternion.LookRotation(movement);
+            rb.rotation = Quaternion.Lerp(rb.rotation, hedefRotasyon, rotationSpeed * Time.fixedDeltaTime);
         }
     }
 }

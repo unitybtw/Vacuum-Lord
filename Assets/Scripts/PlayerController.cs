@@ -7,36 +7,50 @@ public class PlayerController : MonoBehaviour
     public float rotationSpeed = 10f;
 
     [Header("Kontroller")]
-    public MobileJoystick joystick; // Joystick scriptini buraya bağlayacağız
+    public MobileJoystick joystick; 
+
+    [Header("Animasyon")]
+    // YENİ: Animatörü buraya bağlayacağız
+    public Animator characterAnimator; 
 
     private Rigidbody rb;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        
+        // Eğer animatörü elle bağlamadıysan, kod otomatik bulmaya çalışsın (Kolaylık olsun)
+        if (characterAnimator == null)
+            characterAnimator = GetComponentInChildren<Animator>();
     }
 
-    void FixedUpdate() // Fizik işlemleri FixedUpdate'te yapılır
+    void FixedUpdate() 
     {
-        // Joystick yoksa hata vermesin diye kontrol
         if (joystick == null) return;
 
-        // Joystick'ten gelen veriyi al
+        // Joystick verisi
         float xHareket = joystick.InputVector.x;
         float zHareket = joystick.InputVector.y;
 
-        // Hareket vektörünü oluştur
         Vector3 movement = new Vector3(xHareket, 0, zHareket);
+        
+        // Hareket ediyor mu? (Hız 0.1'den büyükse evet)
+        bool isMoving = movement.magnitude > 0.1f;
 
-        // Eğer parmak hareket ediyorsa (Vektör sıfır değilse)
-        if (movement.magnitude > 0.1f)
+        // --- YENİ KISIM: ANİMATÖRÜ GÜNCELLE ---
+        if (characterAnimator != null)
         {
-            // 1. Hareket Ettir (Fizik motoru ile)
-            // Karakterin mevcut pozisyonuna hareket yönünü ekliyoruz
+            // Animator penceresinde oluşturduğumuz "IsRunning" parametresini değiştiriyoruz
+            characterAnimator.SetBool("IsRunning", isMoving);
+        }
+        // --------------------------------------
+
+        // Fiziksel Hareket
+        if (isMoving)
+        {
             Vector3 yeniPozisyon = rb.position + movement * moveSpeed * Time.fixedDeltaTime;
             rb.MovePosition(yeniPozisyon);
 
-            // 2. Yüzünü Döndür
             Quaternion hedefRotasyon = Quaternion.LookRotation(movement);
             rb.rotation = Quaternion.Lerp(rb.rotation, hedefRotasyon, rotationSpeed * Time.fixedDeltaTime);
         }

@@ -659,6 +659,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6998300466712643567, guid: 74f9dbcc2e3aeab4587dc04ec1bae780, type: 3}
   m_PrefabInstance: {fileID: 431767148}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &384613803 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 8802255506973415229, guid: 74f9dbcc2e3aeab4587dc04ec1bae780, type: 3}
+  m_PrefabInstance: {fileID: 431767148}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1508,6 +1513,7 @@ MonoBehaviour:
   moveSpeed: 5
   rotationSpeed: 10
   joystick: {fileID: 1412802823}
+  characterAnimator: {fileID: 384613803}
 --- !u!136 &1333188115
 CapsuleCollider:
   m_ObjectHideFlags: 0

@@ -37,6 +37,13 @@ public class SellZone : MonoBehaviour
 
             // Parayı ver
             GameManager.instance.ParaEkle(birimFiyat);
+
+            // --- YENİ KISIM: SESİ ÇAL ---
+            // AudioManager sahnede var mı diye kontrol edip çalıyoruz
+            if (AudioManager.instance != null)
+            {
+                AudioManager.instance.PlayCash();
+            }
         }
     }
 }

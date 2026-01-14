@@ -35,6 +35,12 @@ public class VacuumSystem : MonoBehaviour
                 other.transform.localScale = Vector3.one; 
                 
                 StackManager.instance.AddToStack(other.gameObject);
+
+                // --- YENİ KISIM: SESİ ÇAL (POP) ---
+                if (AudioManager.instance != null)
+                {
+                    AudioManager.instance.PlayPop();
+                }
             }
         }
     }
